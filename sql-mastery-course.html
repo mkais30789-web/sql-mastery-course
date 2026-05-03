@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Mastery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0f1419;
+            --bg-secondary: #1a2332;
+            --bg-tertiary: #242f3d;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #10b981;
+            --accent-tertiary: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #334155;
+            --sidebar-width: 260px;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        body[lang="ar"] { direction: rtl; }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed; left: 0; top: 0; bottom: 0; width: var(--sidebar-width);
+            background: var(--bg-secondary); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; z-index: 100; overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 24px; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 14px;
+        }
+        .sidebar-logo {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; color: white; font-size: 16px;
+        }
+        .sidebar-title {
+            color: var(--text-primary); font-size: 18px; font-weight: 600;
+        }
+
+        .sidebar-nav { padding: 16px 12px; flex: 1; }
+        .nav-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            color: var(--text-muted); text-decoration: none; border-radius: 10px;
+            margin-bottom: 4px; transition: all 0.2s; font-size: 14px; font-weight: 500;
+        }
+        .nav-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+        .nav-item.active {
+            background: var(--accent-primary); color: white;
+        }
+        .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+        .sidebar-footer {
+            padding: 16px; border-top: 1px solid var(--border);
+            display: flex; gap: 8px;
+        }
+        .lang-btn {
+            flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 8px;
+            background: transparent; color: var(--text-muted); font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .lang-btn.active { background: var(--accent-primary); color: white; border-color: var(--accent-primary); }
+
+        .sidebar-credit {
+            padding: 14px 16px; border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        .sidebar-credit span {
+            font-size: 10px; color: var(--text-muted); line-height: 1.6;
+            display: block; letter-spacing: 0.3px;
+        }
+
+        /* Main Content */
+        .main-content { margin-left: var(--sidebar-width); min-height: 100vh; }
+
+        .page {
+            display: none; min-height: 100vh; padding: 60px 48px; animation: fadeIn 0.4s ease;
+        }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Hero */
+        .hero { padding: 40px 0 80px; position: relative; }
+        .hero::before {
+            content: ''; position: absolute; top: 0; left: -48px; right: 0; bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.12) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
+            pointer-events: none;
+        }
+        .hero h1 {
+            font-size: 42px; font-weight: 700; color: var(--text-primary); margin-bottom: 16px;
+            position: relative;
+        }
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { font-size: 17px; color: var(--text-muted); max-width: 600px; margin-bottom: 32px; position: relative; }
+
+        /* Section */
+        .section { margin-bottom: 48px; position: relative; }
+        .section-title {
+            font-size: 28px; font-weight: 600; color: var(--text-primary); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .section-title .icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-purple));
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        }
+        .section-title .icon svg { width: 22px; height: 22px; color: white; }
+
+        /* Card */
+        .card {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: 16px; padding: 28px; margin-bottom: 20px;
+        }
+        .card:hover { border-color: var(--accent-primary); }
+        .card h3 { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 14px; }
+        .card p { margin-bottom: 14px; font-size: 14px; }
+
+        /* Code */
+        .code-block {
+            background: var(--bg-tertiary); border-radius: 12px; overflow: hidden;
+            margin: 16px 0; border: 1px solid var(--border);
+        }
+        .code-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 16px; background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border);
+        }
+        .code-lang { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .copy-btn {
+            padding: 5px 10px; background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text-muted); font-size: 11px; cursor: pointer;
+        }
+        .copy-btn:hover { background: var(--accent-primary); color: white; }
+        .code-block pre { padding: 18px; overflow-x: auto; font-family: 'Consolas', monospace; font-size: 13px; line-height: 1.7; }
+        .kw { color: #10b981; }
+        .fn { color: #8b5cf6; }
+        .str { color: #f59e0b; }
+        .num { color: #3b82f6; }
+        .cm { color: #6b7280; font-style: italic; }
+        .op { color: #f59e0b; }
+
+        /* Flow */
+        .flow-diagram { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 24px 0; }
+        .flow-step {
+            background: var(--bg-tertiary); border: 1px solid var(--border);
+            border-radius: 10px; padding: 12px 20px; text-align: center;
+        }
+        .flow-step .num { font-size: 11px; color: var(--accent-primary); font-weight: 600; }
+        .flow-step .keyword { font-family: monospace; font-size: 14px; color: var(--accent-secondary); font-weight: 600; }
+
+        /* Table */
+        .fn-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+        .fn-table th, .fn-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+        .fn-table th { background: var(--bg-tertiary); color: var(--text-primary); font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .fn-table td { font-size: 13px; }
+        .fn-name { color: var(--accent-secondary); font-family: monospace; font-weight: 500; }
+
+        /* Note */
+        .note {
+            display: flex; gap: 14px; padding: 18px; border-radius: 12px; margin: 16px 0;
+            background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+        .note.tip { background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.2); }
+        .note.warning { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.2); }
+        .note svg { width: 20px; height: 20px; flex-shrink: 0; color: var(--accent-primary); }
+        .note.tip svg { color: var(--accent-secondary); }
+        .note.warning svg { color: var(--accent-tertiary); }
+        .note p { margin: 0; font-size: 13px; }
+
+        /* Summary */
+        .summary {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(34, 211, 238, 0.05));
+            border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 14px; padding: 24px; margin-top: 24px;
+        }
+        .summary h4 { color: var(--accent-secondary); font-size: 13px; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 1px; }
+        .summary ul { list-style: none; }
+        .summary li { padding: 8px 0; padding-left: 18px; position: relative; font-size: 14px; color: var(--text-secondary); }
+        .summary li::before { content: '→'; position: absolute; left: 0; color: var(--accent-primary); }
+
+        /* Comparison */
+        .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+        .comparison-item { background: var(--bg-tertiary); border-radius: 10px; padding: 18px; }
+        .comparison-item h4 { color: var(--accent-secondary); font-size: 14px; font-weight: 600; margin-bottom: 10px; font-family: monospace; }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; top: auto; bottom: 0; flex-direction: row; border-right: none; border-top: 1px solid var(--border); }
+            .sidebar-header, .sidebar-footer { display: none; }
+            .sidebar-nav { display: flex; overflow-x: auto; padding: 10px; gap: 6px; }
+            .nav-item { flex-direction: column; gap: 4px; padding: 8px 12px; font-size: 11px; white-space: nowrap; }
+            .nav-item span { display: block; }
+            .main-content { margin-left: 0; margin-bottom: 70px; }
+            .page { padding: 30px 20px; }
+            .hero h1 { font-size: 28px; }
+            .comparison-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">SQL</div>
+            <span class="sidebar-title" data-en="SQL Mastery" data-ar="إتقان SQL">SQL Mastery</span>
+        </div>
+        <div class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="home" onclick="showPage('home')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                <span data-en="Home" data-ar="الرئيسية">Home</span>
+            </a>
+            <a href="#" class="nav-item" data-page="order" onclick="showPage('order')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                <span data-en="Order" data-ar="الترتيب">Order</span>
+            </a>
+            <a href="#" class="nav-item" data-page="where" onclick="showPage('where')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg>
+                <span>WHERE vs HAVING</span>
+            </a>
+            <a href="#" class="nav-item" data-page="aggregate" onclick="showPage('aggregate')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                <span data-en="Aggregations" data-ar="التجميعات">Aggregations</span>
+            </a>
+            <a href="#" class="nav-item" data-page="join" onclick="showPage('join')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                <span>JOINs</span>
+            </a>
+            <a href="#" class="nav-item" data-page="union" onclick="showPage('union')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                <span>UNION</span>
+            </a>
+            <a href="#" class="nav-item" data-page="subquery" onclick="showPage('subquery')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <span data-en="Subqueries" data-ar="الفرعية">Subqueries</span>
+            </a>
+            <a href="#" class="nav-item" data-page="cte" onclick="showPage('cte')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                <span>CTEs</span>
+            </a>
+            <a href="#" class="nav-item" data-page="reference" onclick="showPage('reference')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v12.494m6.504-12.494L12 18.747m-6.504-12.494L12 18.747M3 6.253h18M3 18.747h18M3 12.5h18"/></svg>
+                <span data-en="Reference" data-ar="الدليل">Reference</span>
+            </a>
+        </div>
+        <div class="sidebar-footer">
+            <button class="lang-btn active" onclick="setLang('en')">EN</button>
+            <button class="lang-btn" onclick="setLang('ar')">AR</button>
+        </div>
+        <div class="sidebar-credit">
+            <span>Prepared by: Mohammed Qais Mohammed Ali</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- HOME -->
+        <section class="page active" id="page-home">
+            <div class="hero">
+                <h1><span data-en="Master SQL Queries" data-ar="أتقن استعلامات SQL">Master SQL Queries</span></h1>
+                <p data-en="Learn SQL step by step with practical examples. From basic SELECT to advanced CTEs." data-ar="تعلم SQL خطوة بخطوة مع أمثلة عملية. من SELECT الأساسي إلى CTEs المتقدمة.">Learn SQL step by step with practical examples. From basic SELECT to advanced CTEs.</p>
+            </div>
+            <div class="card">
+                <h3 data-en="What is SQL?" data-ar="ما هو SQL؟">What is SQL?</h3>
+                <p data-en="SQL is the language used to communicate with databases. Whether you're analyzing sales, managing users, or building apps — SQL is essential." data-ar="SQL هي اللغة المستخدمة للتواصل مع قواعد البيانات. سواء كنت تحلل المبيعات أو تدير المستخدمين أو تبني تطبيقات — SQL ضروري.">SQL is the language used to communicate with databases. Whether you're analyzing sales, managing users, or building apps — SQL is essential.</p>
+            </div>
+            <div class="summary">
+                <h4>📚 Topics Covered</h4>
+                <ul>
+                    <li data-en="Order of Operations - How SQL processes your query" data-ar="ترتيب العمليات - كيف يعالج SQL استعلامك">Order of Operations - How SQL processes your query</li>
+                    <li data-en="WHERE vs HAVING - Filtering before/after grouping" data-ar="WHERE vs HAVING - التصفية قبل/بعد التجميع">WHERE vs HAVING - Filtering before/after grouping</li>
+                    <li data-en="Aggregations - SUM, AVG, COUNT, MIN, MAX" data-ar="التجميعات - SUM, AVG, COUNT, MIN, MAX">Aggregations - SUM, AVG, COUNT, MIN, MAX</li>
+                    <li data-en="JOINs - Combining tables" data-ar="JOINs - ربط الجداول">JOINs - Combining tables</li>
+                    <li data-en="UNION - Combining results" data-ar="UNION - دمج النتائج">UNION - Combining results</li>
+                    <li data-en="Subqueries - Nested queries" data-ar="الاستعلامات الفرعية">Subqueries - Nested queries</li>
+                    <li data-en="CTEs - Reusable query blocks" data-ar="CTEs - كتل قابلة لإعادة الاستخدام">CTEs - Reusable query blocks</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ORDER -->
+        <section class="page" id="page-order">
+            <div class="section">
+                <h2 class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div>
+                    <span data-en="Order of Operations" data-ar="ترتيب العمليات">Order of Operations</span>
+                </h2>
+                <div class="card">
+                    <p data-en="SQL doesn't execute top to bottom. It follows a specific order. Understanding this helps write better queries." data-ar="SQL لا ينفذ من أعلى لأسفل. يتبع ترتيباً محدداً. فهم هذا يساعد في كتابة استعلامات أفضل.">SQL doesn't execute top to bottom. It follows a specific order. Understanding this helps write better queries.</p>
+                    <div class="flow-diagram">
+                        <div class="flow-step"><div class="num">1</div><div class="keyword">FROM/JOIN</div></div>
+                        <div class="flow-step"><div class="num">2</div><div class="keyword">WHERE</div></div>
+                        <div class="flow-step"><div class="num">3</div><div class="keyword">GROUP BY</div></div>
+                        <div class="flow-step"><div class="num">4</div><div class="keyword">HAVING</div></div>
+                        <div class="flow-step"><div class="num">5</div><div class="keyword">SELECT</div></div>
+                        <div class="flow-step"><div class="num">6</div><div class="keyword">ORDER BY</div></div>
+                        <div class="flow-step"><div class="num">7</div><div class="keyword">LIMIT</div></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 data-en="Example" data-ar="مثال">Example</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="cm">-- Execution order:</span>
+<span class="kw">SELECT</span> category, <span class="fn">SUM</span>(sales)
+<span class="kw">FROM</span> orders                  <span class="cm">-- 1. Load</span>
+<span class="kw">WHERE</span> status=<span class="str">'active'</span>     <span class="cm">-- 2. Filter rows</span>
+<span class="kw">GROUP BY</span> category          <span class="cm">-- 3. Group</span>
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(sales)>1000  <span class="cm">-- 4. Filter groups</span>
+<span class="kw">ORDER BY</span> <span class="fn">SUM</span>(sales)      <span class="cm">-- 6. Sort</span>
+<span class="kw">LIMIT</span> <span class="num">10</span>;                  <span class="cm">-- 7. Top 10</span></code></pre>
+                    </div>
+                </div>
+                <div class="note">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <p data-en="WHERE filters BEFORE grouping, HAVING filters AFTER. That's why you can't use aliases in WHERE!" data-ar="WHERE تصفية قبل التجميع، HAVING بعد. لذلك لا يمكنك استخدام الأسماء المستعارة في WHERE!">WHERE filters BEFORE grouping, HAVING filters AFTER. That's why you can't use aliases in WHERE!</p>
+                </div>
+                <div class="summary">
+                    <h4>📝 Summary</h4>
+                    <ul>
+                        <li data-en="FROM/JOIN defines source data" data-ar="FROM/JOIN يحدد بيانات المصدر">FROM/JOIN defines source data</li>
+                        <li data-en="WHERE filters individual rows (before GROUP BY)" data-ar="WHERE يصفية الصفوف الفردية (قبل GROUP BY)">WHERE filters individual rows (before GROUP BY)</li>
+                        <li data-en="HAVING filters grouped results (after GROUP BY)" data-ar="HAVING يصفية النتائج المجمعة (بعد GROUP BY)">HAVING filters grouped results (after GROUP BY)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- WHERE vs HAVING -->
+        <section class="page" id="page-where">
+            <div class="section">
+                <h2 class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4m0 6l-4 4-4-4"/></svg></div>
+                    <span>WHERE vs HAVING</span>
+                </h2>
+                <div class="card">
+                    <div class="comparison-grid">
+                        <div class="comparison-item">
+                            <h4>WHERE</h4>
+                            <p data-en="Filters BEFORE grouping. Works on rows. Cannot use with aggregates." data-ar="يصفية قبل التجميع. يعمل على الصفوف. لا يستخدم مع التجميعات.">Filters BEFORE grouping. Works on rows. Cannot use with aggregates.</p>
+                        </div>
+                        <div class="comparison-item">
+                            <h4>HAVING</h4>
+                            <p data-en="Filters AFTER grouping. Works on groups. Can use with aggregates." data-ar="يصفية بعد التجميع. يعمل على المجموعات. يستخدم مع التجميعات.">Filters AFTER grouping. Works on groups. Can use with aggregates.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 data-en="Example" data-ar="مثال">Example</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">SELECT</span> customer_id, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> orders, <span class="fn">SUM</span>(amount) <span class="kw">AS</span> total
+<span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> amount><span class="num">50</span>        <span class="cm">-- Filter: orders over $50</span>
+<span class="kw">GROUP BY</span> customer_id
+<span class="kw">HAVING</span> <span class="fn">SUM</span>(amount)><span class="num">1000</span>; <span class="cm">-- Filter: over $1000 total</span></code></pre>
+                    </div>
+                </div>
+                <div class="note tip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                    <p data-en="Use WHERE before grouping when possible - it's faster!" data-ar="استخدم WHERE قبل التجميع عندما أمكن - إنه أسرع!">Use WHERE before grouping when possible - it's faster!</p>
+                </div>
+                <div class="summary">
+                    <h4>📝 Summary</h4>
+                    <ul>
+                        <li data-en="WHERE = row filter (before GROUP BY)" data-ar="WHERE = فلتر صفوف (قبل GROUP BY)">WHERE = row filter (before GROUP BY)</li>
+                        <li data-en="HAVING = group filter (after GROUP BY)" data-ar="HAVING = فلتر مجموعات (بعد GROUP BY)">HAVING = group filter (after GROUP BY)</li>
+                        <li data-en="WHERE is faster - filters less data to group" data-ar="WHERE أسرع - يصفية بيانات أقل للتجميع">WHERE is faster - filters less data to group</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- AGGREGATIONS -->
+        <section class="page" id="page-aggregate">
+            <div class="section">
+                <h2 class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+                    <span data-en="Aggregations" data-ar="التجميعات">Aggregations</span>
+                </h2>
+                <div class="card">
+                    <table class="fn-table">
+                        <thead><tr><th>Function</th><th data-en="Description" data-ar="الوصف">Description</th><th data-en="Example" data-ar="مثال">Example</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">COUNT()</td><td data-en="Count rows" data-ar="عد الصفوف">Count rows</td><td>COUNT(*) = 150</td></tr>
+                            <tr><td class="fn-name">SUM()</td><td data-en="Add values" data-ar="جمع القيم">Add values</td><td>SUM(sales) = 50000</td></tr>
+                            <tr><td class="fn-name">AVG()</td><td data-en="Calculate average" data-ar="المتوسط">Average</td><td>AVG(price) = 29.99</td></tr>
+                            <tr><td class="fn-name">MIN()</td><td data-en="Find minimum" data-ar="الحد الأدنى">Minimum</td><td>MIN(price) = 5.00</td></tr>
+                            <tr><td class="fn-name">MAX()</td><td data-en="Find maximum" data-ar="الحد الأقصى">Maximum</td><td>MAX(price) = 999</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <h3 data-en="GROUP BY" data-ar="GROUP BY">GROUP BY</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">SELECT</span> category, <span class="fn">COUNT</span>(*) <span class="kw">AS</span> products, <span class="fn">AVG</span>(price) <span class="kw">AS</span> avg_price
+<span class="kw">FROM</span> products
+<span class="kw">WHERE</span> active=<span class="kw">TRUE</span>
+<span class="kw">GROUP BY</span> category
+<span class="kw">ORDER BY</span> avg_price <span class="kw">DESC</span>;</code></pre>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 data-en="DISTINCT with Aggregates" data-ar="DISTINCT مع التجميعات">DISTINCT with Aggregates</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">SELECT</span> <span class="fn">COUNT</span>(*) <span class="kw">AS</span> total, <span class="fn">COUNT</span>(<span class="kw">DISTINCT</span> customer_id) <span class="kw">AS</span> unique
+<span class="kw">FROM</span> orders;</code></pre>
+                    </div>
+                </div>
+                <div class="summary">
+                    <h4>📝 Summary</h4>
+                    <ul>
+                        <li><strong>COUNT</strong> - <span data-en="Count rows" data-ar="عد الصفوف">Count rows</span></li>
+                        <li><strong>SUM</strong> - <span data-en="Add values" data-ar="جمع القيم">Add values</span></li>
+                        <li><strong>AVG</strong> - <span data-en="Mean value" data-ar="المتوسط">Mean value</span></li>
+                        <li><strong>MIN/MAX</strong> - <span data-en="Find extremes" data-ar="الحدود">Find extremes</span></li>
+                        <li><strong>GROUP BY</strong> - <span data-en="Create groups" data-ar="إنشاء مجموعات">Create groups</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- JOIN -->
+        <section class="page" id="page-join">
+            <div class="section">
+                <h2 class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+                    <span>JOINs</span>
+                </h2>
+                <div class="card">
+                    <table class="fn-table">
+                        <thead><tr><th>Type</th><th data-en="Returns" data-ar="يُرجع">Returns</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">INNER JOIN</td><td data-en="Only matching rows" data-ar="الصفوف المطابقة فقط">Only matching rows</td></tr>
+                            <tr><td class="fn-name">LEFT JOIN</td><td data-en="All left + matches" data-ar="كل اليسار + المطابقات">All left + matches</td></tr>
+                            <tr><td class="fn-name">RIGHT JOIN</td><td data-en="All right + matches" data-ar="كل اليمين + المطابقات">All right + matches</td></tr>
+                            <tr><td class="fn-name">FULL OUTER</td><td data-en="All rows from both" data-ar="كل الصفوف من كليهما">All rows from both</td></tr>
+                            <tr><td class="fn-name">CROSS JOIN</td><td data-en="Every combination" data-ar="كل التباديل">Every combination</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <h3>INNER JOIN</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">SELECT</span> o.order_id, c.name, o.amount
+<span class="kw">FROM</span> orders o
+<span class="kw">INNER JOIN</span> customers c <span class="kw">ON</span> o.customer_id=c.id;</code></pre>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3>LEFT JOIN</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">SELECT</span> c.name, <span class="fn">COUNT</span>(o.id) <span class="kw">AS</span> orders
+<span class="kw">FROM</span> customers c
+<span class="kw">LEFT JOIN</span> orders o <span class="kw">ON</span> c.id=o.customer_id
+<span class="kw">GROUP BY</span> c.id;</code></pre>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 data-en="Multiple JOINs" data-ar="JOINs متعددة">Multiple JOINs</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">SELECT</span> o.id, c.name, p.name, r.name
+<span class="kw">FROM</span> orders o
+<span class="kw">JOIN</span> customers c <span class="kw">ON</span> o.customer_id=c.id
+<span class="kw">JOIN</span> products p <span class="kw">ON</span> o.product_id=p.id
+<span class="kw">JOIN</span> regions r <span class="kw">ON</span> c.region_id=r.id;</code></pre>
+                    </div>
+                </div>
+                <div class="note warning">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <p data-en="Always include ON condition! Without it you get Cartesian product." data-ar="دائماً_include شرط ON! بدونه تحصل على حاصل ديكارتي.">Always include ON condition! Without it you get Cartesian product.</p>
+                </div>
+                <div class="summary">
+                    <h4>📝 Summary</h4>
+                    <ul>
+                        <li><strong>INNER</strong> - <span data-en="Only matches" data-ar="المطابقات فقط">Only matches</span></li>
+                        <li><strong>LEFT</strong> - <span data-en="All left + matches" data-ar="كل اليسار + المطابقات">All left + matches</span></li>
+                        <li><strong>RIGHT</strong> - <span data-en="All right + matches" data-ar="كل اليمين + المطابقات">All right + matches</span></li>
+                        <li><strong>CROSS</strong> - <span data-en="Every combination" data-ar="كل التباديل">Every combination</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- UNION -->
+        <section class="page" id="page-union">
+            <div class="section">
+                <h2 class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg></div>
+                    <span>UNION</span>
+                </h2>
+                <div class="card">
+                    <div class="comparison-grid">
+                        <div class="comparison-item">
+                            <h4>UNION</h4>
+                            <p data-en="Removes duplicates. Slower." data-ar="يزيل التكرارات. أبطأ.">Removes duplicates. Slower.</p>
+                        </div>
+                        <div class="comparison-item">
+                            <h4>UNION ALL</h4>
+                            <p data-en="Keeps all rows. Faster." data-ar="يحتفظ بجميع الصفوف. أسرع.">Keeps all rows. Faster.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 data-en="Example" data-ar="مثال">Example</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">SELECT</span> id, name, <span class="str">'Active'</span> <span class="kw">AS</span> status <span class="kw">FROM</span> users <span class="kw">WHERE</span> active=<span class="kw">TRUE</span>
+<span class="kw">UNION</span>
+<span class="kw">SELECT</span> id, name, <span class="str">'Inactive'</span> <span class="kw">AS</span> status <span class="kw">FROM</span> users <span class="kw">WHERE</span> active=<span class="kw">FALSE</span>;</code></pre>
+                    </div>
+                </div>
+                <div class="note">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <p data-en="Both queries must have same column count and types." data-ar="كلا الاستعلامين يجب أن يكون لهما نفس عدد وأنواع الأعمدة.">Both queries must have same column count and types.</p>
+                </div>
+                <div class="summary">
+                    <h4>📝 Summary</h4>
+                    <ul>
+                        <li data-en="UNION removes duplicates, UNION ALL keeps them" data-ar="UNION يزيل التكرارات، UNION ALL يحتفظ">UNION removes duplicates, UNION ALL keeps them</li>
+                        <li data-en="UNION ALL is faster - use when possible" data-ar="UNION ALL أسرع - استخدمه عندما أمكن">UNION ALL is faster - use when possible</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SUBQUERY -->
+        <section class="page" id="page-subquery">
+            <div class="section">
+                <h2 class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+                    <span data-en="Subqueries" data-ar="الاستعلامات الفرعية">Subqueries</span>
+                </h2>
+                <div class="card">
+                    <p data-en="A query inside another query. Like a temporary calculation." data-ar="استعلام داخل استعلام آخر. مثل حساب مؤقت.">A query inside another query. Like a temporary calculation.</p>
+                </div>
+                <div class="card">
+                    <h3 data-en="In WHERE" data-ar="في WHERE">In WHERE</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">SELECT</span> name, price
+<span class="kw">FROM</span> products
+<span class="kw">WHERE</span> price > (<span class="kw">SELECT</span> <span class="fn">AVG</span>(price) <span class="kw">FROM</span> products);</code></pre>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 data-en="In FROM (Derived Table)" data-ar="في FROM (جدول مشتق)">In FROM</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">SELECT</span> region, avg_sales
+<span class="kw">FROM</span> (
+    <span class="kw">SELECT</span> region, <span class="fn">AVG</span>(sales) <span class="kw">AS</span> avg_sales
+    <span class="kw">FROM</span> stores <span class="kw">GROUP BY</span> region
+) stats
+<span class="kw">WHERE</span> avg_sales > <span class="num">10000</span>;</code></pre>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 data-en="In SELECT" data-ar="في SELECT">In SELECT</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">SELECT</span> name, amount, (
+    <span class="kw">SELECT</span> <span class="fn">AVG</span>(amount) <span class="kw">FROM</span> orders o2
+    <span class="kw">WHERE</span> o2.customer_id=o1.customer_id
+) <span class="kw">AS</span> customer_avg
+<span class="kw">FROM</span> orders o1;</code></pre>
+                    </div>
+                </div>
+                <div class="summary">
+                    <h4>📝 Summary</h4>
+                    <ul>
+                        <li data-en="WHERE: Filter based on calculated value" data-ar="WHERE: تصفية بناءً على قيمة محسوبة">WHERE: Filter based on calculated value</li>
+                        <li data-en="FROM: Use as temporary table" data-ar="FROM: استخدام كجدول مؤقت">FROM: Use as temporary table</li>
+                        <li data-en="SELECT: Add calculated column" data-ar="SELECT: إضافة عمود محسوب">SELECT: Add calculated column</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTE -->
+        <section class="page" id="page-cte">
+            <div class="section">
+                <h2 class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div>
+                    <span>CTEs</span>
+                </h2>
+                <div class="card">
+                    <p data-en="Named subquery. Define once, use multiple times. Much cleaner than nested queries!" data-ar="استعلام فرعي مسمى. عرّفه مرة واحدة، استخدمه عدة مرات. أنظف بكثير من الاستعلامات المتداخلة!">Named subquery. Define once, use multiple times. Much cleaner than nested queries!</p>
+                </div>
+                <div class="card">
+                    <h3 data-en="Basic Syntax" data-ar="البناء الأساسي">Basic Syntax</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">WITH</span> cte_name <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> * <span class="kw">FROM</span> table <span class="kw">WHERE</span> condition
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> cte_name;</code></pre>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 data-en="Multiple CTEs" data-ar="CTEs متعددة">Multiple CTEs</h3>
+                    <div class="code-block">
+                        <div class="code-header"><span class="code-lang">SQL</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+                        <pre><code><span class="kw">WITH</span> orders_sum <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> customer_id, <span class="fn">SUM</span>(amount) <span class="kw">AS</span> total
+    <span class="kw">FROM</span> orders <span class="kw">GROUP BY</span> customer_id
+),
+ranked <span class="kw">AS</span> (
+    <span class="kw">SELECT</span> *, <span class="fn">RANK</span>() <span class="kw">OVER</span>(<span class="kw">ORDER BY</span> total <span class="kw">DESC</span>) <span class="kw">AS</span> r
+    <span class="kw">FROM</span> orders_sum
+)
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> ranked <span class="kw">WHERE</span> r <= <span class="num">10</span>;</code></pre>
+                    </div>
+                </div>
+                <div class="note tip">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                    <p data-en="CTEs also enable recursive queries for hierarchical data!" data-ar="CTEs أيضاً تتيح استعلامات متكررة للبيانات الهرمية!">CTEs also enable recursive queries for hierarchical data!</p>
+                </div>
+                <div class="summary">
+                    <h4>📝 Summary</h4>
+                    <ul>
+                        <li data-en="Named, reusable query blocks" data-ar="كتل استعلام مسماة قابلة لإعادة الاستخدام">Named, reusable query blocks</li>
+                        <li data-en="Chain multiple CTEs together" data-ar="ربط CTEs متعددة معاً">Chain multiple CTEs together</li>
+                        <li data-en="More readable than subqueries" data-ar="أكثر قابلية للقراءة من الاستعلامات الفرعية">More readable than subqueries</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- REFERENCE -->
+        <section class="page" id="page-reference">
+            <div class="section">
+                <h2 class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.253v12.494m6.504-12.494L12 18.747m-6.504-12.494L12 18.747M3 6.253h18M3 18.747h18M3 12.5h18"/></svg></div>
+                    <span data-en="SQL Functions Reference" data-ar="دليلFunctions في SQL">SQL Functions Reference</span>
+                </h2>
+
+                <!-- SELECT -->
+                <div class="card">
+                    <h3>SELECT - جلب البيانات</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الصيغة</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">SELECT * FROM table</td><td>جلب كل الأعمدة</td></tr>
+                            <tr><td class="fn-name">SELECT col1, col2 FROM table</td><td>جلب أعمدة محددة</td></tr>
+                            <tr><td class="fn-name">SELECT DISTINCT col FROM table</td><td>جلب قيم فريدة فقط</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ اكتب الأعمدة المطلوبة بعد SELECT</li>
+                            <li>✅ استخدم * لجلب كل الأعمدة</li>
+                            <li>✅ استخدم DISTINCT لإزالة التكرارات</li>
+                            <li>✅WHERE هي المرحلة التالية لتصفية البيانات</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- WHERE -->
+                <div class="card">
+                    <h3>WHERE - تصفية الصفوف</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الشرط</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">= </td><td>تساوي</td></tr>
+                            <tr><td class="fn-name"><> أو !=</td><td>لا يساوي</td></tr>
+                            <tr><td class="fn-name">></td><td>أكبر من</td></tr>
+                            <tr><td class="fn-name"><</td><td>أصغر من</td></tr>
+                            <tr><td class="fn-name">>=, <=</td><td>أكبر/أصغر أو يساوي</td></tr>
+                            <tr><td class="fn-name">AND, OR, NOT</td><td>ربط الشروط</td></tr>
+                            <tr><td class="fn-name">IN (1,2,3)</td><td>ضمن مجموعة</td></tr>
+                            <tr><td class="fn-name">BETWEEN 1 AND 10</td><td>ضمن نطاق</td></tr>
+                            <tr><td class="fn-name">LIKE 'A%'</td><td>نمط نصي</td></tr>
+                            <tr><td class="fn-name">IS NULL</td><td>قيمة فارغة</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ يوضع بعد FROM و JOIN</li>
+                            <li>✅ يصفية الصفوف قبل التجميع (GROUP BY)</li>
+                            <li>✅ لا يمكن استخدام aliases هنا</li>
+                            <li>✅ لا يمكن استخدام دوال التجميع</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- ORDER BY -->
+                <div class="card">
+                    <h3>ORDER BY - ترتيب النتائج</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الصيغة</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">ORDER BY col ASC</td><td>ترتيب تصاعدي</td></tr>
+                            <tr><td class="fn-name">ORDER BY col DESC</td><td>ترتيب تنازلي</td></tr>
+                            <tr><td class="fn-name">ORDER BY 1, 2</td><td>ترتيب حسب العمود 1 ثم 2</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ يوضع في نهاية الاستعلام</li>
+                            <li>✅ ASC = تصاعدي (افتراضي)</li>
+                            <li>✅ DESC = تنازلي</li>
+                            <li>✅ يستخدم الأرقام للترتيب حسب رقم العمود</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- LIMIT -->
+                <div class="card">
+                    <h3>LIMIT - تحديد عدد الصفوف</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الصيغة</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">LIMIT 10</td><td>أول 10 صفوف</td></tr>
+                            <tr><td class="fn-name">LIMIT 5, 10</td><td>تجاوز 5 وجلب 10</td></tr>
+                            <tr><td class="fn-name">LIMIT 10 OFFSET 5</td><td>نفس السابق</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ آخر مرحلة في تنفيذ الاستعلام</li>
+                            <li>✅ OFFSET تتجاوز صفوف</li>
+                            <li>✅ مفيد للصفحات</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- GROUP BY -->
+                <div class="card">
+                    <h3>GROUP BY - تجميع الصفوف</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الصيغة</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">GROUP BY col</td><td>تجميع حسب عمود</td></tr>
+                            <tr><td class="fn-name">GROUP BY col1, col2</td><td>تجميع متعدد</td></tr>
+                            <tr><td class="fn-name">GROUP BY ROLLUP(col)</td><td>مجاميع فرعية</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ يوضع بعد WHERE</li>
+                            <li>✅ كل الأعمدة يجب أن تكون في GROUP BY أو دالة تجميع</li>
+                            <li>✅ يسبق HAVING</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- HAVING -->
+                <div class="card">
+                    <h3>HAVING - تصفية المجموعات</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الصيغة</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">HAVING SUM(amount) > 1000</td><td>تصفية بالمجموع</td></tr>
+                            <tr><td class="fn-name">HAVING COUNT(*) > 5</td><td>تصفية بعدد العناصر</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ يوضع بعد GROUP BY</li>
+                            <li>✅ يصفية المجموعات بعد التجميع</li>
+                            <li>✅ يمكن استخدام aliases</li>
+                            <li>✅ يمكن استخدام دوال التجميع</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Aggregate Functions -->
+                <div class="card">
+                    <h3>دوال التجميع - Aggregate Functions</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الدالة</th><th>الوصف</th><th>مثال</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">COUNT()</td><td>عدد الصفوف</td><td>COUNT(*) = 100</td></tr>
+                            <tr><td class="fn-name">SUM()</td><td>مجموع القيم</td><td>SUM(price) = 5000</td></tr>
+                            <tr><td class="fn-name">AVG()</td><td>المتوسط الحسابي</td><td>AVG(age) = 25.5</td></tr>
+                            <tr><td class="fn-name">MIN()</td><td>الحد الأدنى</td><td>MIN(price) = 10</td></tr>
+                            <tr><td class="fn-name">MAX()</td><td>الحد الأقصى</td><td>MAX(price) = 1000</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ COUNT(*) = كل الصفوف</li>
+                            <li>✅ COUNT(col) = الصفوف غير الفارغة</li>
+                            <li>✅ COUNT(DISTINCT col) = القيم الفريدة</li>
+                            <li>✅ SUM/AVG/MIN/MAX تتجاهل NULL</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- JOINs -->
+                <div class="card">
+                    <h3>JOINs - ربط الجداول</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>النوع</th><th>الوصف</th><th>الصيغة</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">INNER JOIN</td><td>المطابقات فقط</td><td>A ∩ B</td></tr>
+                            <tr><td class="fn-name">LEFT JOIN</td><td>كل اليسار + المطابقات</td><td>A + (A∩B)</td></tr>
+                            <tr><td class="fn-name">RIGHT JOIN</td><td>كل اليمين + المطابقات</td><td>B + (A∩B)</td></tr>
+                            <tr><td class="fn-name">FULL OUTER</td><td>كل الصفوف</td><td>A + B</td></tr>
+                            <tr><td class="fn-name">CROSS JOIN</td><td>كل التباديل</td><td>A × B</td></tr>
+                            <tr><td class="fn-name">SELF JOIN</td><td>جدول مع نفسه</td><td>JOIN نفسه</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ ON يُحدد شرط الربط</li>
+                            <li>✅ INNER = الأكثر استخداماً</li>
+                            <li>✅ LEFT = جميع صفوف اليسار</li>
+                            <li>✅ بدون ON = خطأ!</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- UNION -->
+                <div class="card">
+                    <h3>UNION - دمج النتائج</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>النوع</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">UNION</td><td>يزيل التكرارات</td></tr>
+                            <tr><td class="fn-name">UNION ALL</td><td>يحتفظ بالتكرارات (أسرع)</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ نفس عدد الأعمدة</li>
+                            <li>✅ نفس ترتيب الأنواع</li>
+                            <li>✅ UNION ALL أسرع</li>
+                            <li>✅ أعمدة النتيجة من الاستعلام الأول</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Subqueries -->
+                <div class="card">
+                    <h3>Subqueries - الاستعلامات الفرعية</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الموقع</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">WHERE col > (SELECT...)</td><td>تصفية بقيمة محسوبة</td></tr>
+                            <tr><td class="fn-name">FROM (SELECT...) AS t</td><td>جدول مؤقت</td></tr>
+                            <tr><td class="fn-name">SELECT (SELECT...)</td><td>عمود محسوب</td></tr>
+                            <tr><td class="fn-name">IN / NOT IN</td><td>ضمن/خارج مجموعة</td></tr>
+                            <tr><td class="fn-name">EXISTS / NOT EXISTS</td><td>توجد/لا توجد صفوف</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ مترابطة = تعمل لكل صف (بطيئة)</li>
+                            <li>✅ غير مترابطة = تعمل مرة واحدة</li>
+                            <li>✅ IN للمجموعة الصغيرة</li>
+                            <li>✅ EXISTS أفضل للمجموعات الكبيرة</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- CTEs -->
+                <div class="card">
+                    <h3>CTEs - تعبيرات الجدول المشترك</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الصيغة</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">WITH cte AS (...)</td><td> CTE واحد</td></tr>
+                            <tr><td class="fn-name">WITH c1 AS..., c2 AS...</td><td>CTEs متعددة</td></tr>
+                            <tr><td class="fn-name">WITH RECURSIVE cte AS...</td><td>CTE متكرر (هرمي)</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ يوضع في بداية الاستعلام</li>
+                            <li>✅ قابل لإعادة الاستخدام</li>
+                            <li>✅ أنظف من Subqueries</li>
+                            <li>✅ يدعم الاستعلامات المتكررة</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- CASE -->
+                <div class="card">
+                    <h3>CASE - الشروط</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الصيغة</th><th>الوصف</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">CASE WHEN THEN END</td><td>شرط بسيط</td></tr>
+                            <tr><td class="fn-name">CASE col WHEN 'a' THEN...</td><td>شرط على قيمة</td></tr>
+                        </tbody>
+                    </table>
+                    <div class="summary">
+                        <h4>📋 طريقة الاستخدام</h4>
+                        <ul>
+                            <li>✅ بديل IF في SQL</li>
+                            <li>✅ ELSE اختياري (يُرجع NULL)</li>
+                            <li>✅ CASE تُنهي بـ END</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- String Functions -->
+                <div class="card">
+                    <h3>دوال النصوص - String Functions</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الدالة</th><th>الوصف</th><th>مثال</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">UPPER()</td><td>حروف كبيرة</td><td>UPPER('sql') = 'SQL'</td></tr>
+                            <tr><td class="fn-name">LOWER()</td><td>حروف صغيرة</td><td>LOWER('SQL') = 'sql'</td></tr>
+                            <tr><td class="fn-name">LENGTH()</td><td>عدد الأحرف</td><td>LENGTH('sql') = 3</td></tr>
+                            <tr><td class="fn-name">TRIM()</td><td>إزالة الفراغات</td><td>TRIM(' sql ') = 'sql'</td></tr>
+                            <tr><td class="fn-name">SUBSTRING()</td><td>استخراج نص</td><td>SUBSTR('SQL',1,2) = 'SQ'</td></tr>
+                            <tr><td class="fn-name">CONCAT()</td><td>دمج نصوص</td><td>CONCAT('A','B') = 'AB'</td></tr>
+                            <tr><td class="fn-name">REPLACE()</td><td>استبدال نص</td><td>REPLACE('A','A','B')</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Date Functions -->
+                <div class="card">
+                    <h3>دوال التاريخ - Date Functions</h3>
+                    <table class="fn-table">
+                        <thead><tr><th>الدالة</th><th>الوصف</th><th>مثال</th></tr></thead>
+                        <tbody>
+                            <tr><td class="fn-name">NOW()</td><td>التاريخ والوقت الحالي</td><td>2024-01-01 12:00:00</td></tr>
+                            <tr><td class="fn-name">CURDATE()</td><td>التاريخ الحالي</td><td>2024-01-01</td></tr>
+                            <tr><td class="fn-name">DATE_ADD()</td><td>إضافة أيام/شهور</td><td>DATE_ADD(NOW(), INTERVAL 1 DAY)</td></tr>
+                            <tr><td class="fn-name">DATEDIFF()</td><td>فرق التاريخين</td><td>DATEDIFF('2024-1-2','2024-1-1') = 1</td></tr>
+                            <tr><td class="fn-name">YEAR(), MONTH(), DAY()</td><td>استخراج جزء</td><td>YEAR('2024-01-01') = 2024</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <script>
+        function getLang() { return document.body.lang || 'en'; }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.nav-item').forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.page === pageId) link.classList.add('active');
+            });
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById('page-' + pageId).classList.add('active');
+        }
+
+        function setLang(lang) {
+            document.body.lang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase() === lang);
+            });
+            document.querySelectorAll('[data-en][data-ar]').forEach(el => {
+                el.textContent = el.dataset[lang];
+            });
+        }
+
+        function copyCode(btn) {
+            const code = btn.closest('.code-block').querySelector('pre').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = 'Copy', 2000);
+            });
+        }
+    </script>
+</body>
+</html>
